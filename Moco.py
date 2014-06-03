@@ -2,85 +2,162 @@ import sys
 import serial
 import PyTango
 
+RESTORESOFTINBEAM_IN_DOC = ''
+RESTORESOFTINBEAM_OUT_DOC = ''
+TUNE_IN_DOC = ''
+TUNE_OUT_DOC = ''
+TUNEPEAK_IN_DOC = ''
+TUNEPEAK_OUT_DOC = ''
+GO_IN_DOC = ''
+GO_OUT_DOC = ''
+STOP_IN_DOC = ''
+STOP_OUT_DOC = ''
+PAUSE_IN_DOC = 'ON/OFF'
+PAUSE_OUT_DOC = ''
+SETOPERATIONFLAGS_IN_DOC = ('Sequence of strings - ARGIN. They will be merged ' +
+                           'to a SET ARGIN[0] ARGIN[1] ... and send to MOCO')
+SETOPERATIONFLAGS_OUT_DOC = ''
+CLEAROPERATIONFLAGS_IN_DOC = ('Sequence of strings - ARGIN. They will be merged ' +
+                           'to CLEAR ARGIN[0] ARGIN[1] ... and send to MOCO')
+CLEAROPERATIONFLAGS_OUT_DOC = ''
+GETINFO_IN_DOC = ''
+GETINFO_OUT_DOC = ''
+RESET_IN_DOC = ''
+RESET_OUT_DOC = ''
+ONLINECMD_IN_DOC = 'Any MOCO understandable command e.g. MODE, ?GAIN'
+ONLINECMD_OUT_DOC = 'If a query command was sent, the result gets returned'
+OSCILON_IN_DOC = ''
+OSCILON_OUT_DOC = ''
+OSCILOFF_IN_DOC = ''
+OSCILOFF_OUT_DOC = ''
+
+
+INBEAMCONF_DOC = ('Set/query INBEAM configuration (equivalent to ' +
+                                                            '?INBEAM/INBEAM)')
+OUTBEAMCONF_DOC = ('Set/query OUTBEAM configuration (equivalent to ' +
+                                                            '?OUTBEAM/OUTBEAM)')
+SETPOINT_DOC = 'Set/query setpoint value (equivalent to ?SETPOINT/SETPOINT)'
+MODE_DOC = 'Set/query operation mode (equivalent to ?MODE/MODE)'
+TAU_DOC = 'Set/query regulation time constant (equivalent to ?TAU/TAU)'
+SOFTBEAM_DOC = ('Set/query software INBEAM values (equivalent to ' +
+                                                          '?SOFTBEAM/SOFTBEAM)')
+OPERATIONFLAGS_DOC = 'Set/query operation flags (equivalent to ?SET/SET)'
+MOCOSTATE_DOC = 'Query controller state (equivalent to ?STATE)'
+PIEZO_DOC = 'Set/query output voltage (equivalent to ?PIEZO/PIEZO)' 
+SCANSPEED_DOC = 'Set/query scanning speed values (equivalent to ?SPEED/SPEED)'
+OSCBEAMMAINSIGNAL_DOC = ('Query main signal amplitude (equivalent to ' + 
+                                                                 '?OSCBEAM[0])')
+OSCBEAMQUADSIGNAL_DOC = ('Query quadrature signal amplitude (equivalent to ' + 
+                                                                 '?OSCBEAM[1])')
+PHASE_DOC = 'Set/query oscillation phase (equivalent to ?PHASE/PHASE)'
+AMPLITUDE_DOC = ('Set/query amplitude of oscillation (equivalent to ' +
+                                                         '?AMPLITUDE/AMPLITUDE')
+FREQUENCY_DOC = ('Set/query oscillation frequency (equivalent to ' + 
+                                                        '?FREQUENCY/FREQUENCY)') 
+SLOPE_DOC = 'Set/query response function slope (equivalent to ?SLOPE/SLOPE)'
+
 class MocoClass(PyTango.DeviceClass):
 
-    cmd_list = { 'RestoreSoftInBeam' : [ [ PyTango.ArgType.DevVoid, "" ],
-                                         [ PyTango.ArgType.DevVoid, "" ] ],
-                 'Tune' : [ [ PyTango.ArgType.DevVoid, "" ],
-                            [ PyTango.ArgType.DevVoid, "" ] ],
-                  'TunePeak' : [ [ PyTango.ArgType.DevVoid, "" ],
-                            [ PyTango.ArgType.DevVoid, "" ] ],
-                  'Go' : [ [ PyTango.ArgType.DevVoid, "" ],
-                            [ PyTango.ArgType.DevVoid, "" ] ],
-                  'Stop' : [ [ PyTango.ArgType.DevVoid, "" ],
-                            [ PyTango.ArgType.DevVoid, "" ] ],
-                  'Pause' : [ [ PyTango.ArgType.DevString, "" ],
-                            [ PyTango.ArgType.DevVoid, "" ] ],
-                  'SetOperationFlags' : [ [ PyTango.ArgType.DevVarStringArray, "" ],
-                                        [ PyTango.ArgType.DevVoid, "" ] ],
-                  'ClearOperationFlags' : [ [ PyTango.ArgType.DevVarStringArray, "" ],
-                                        [ PyTango.ArgType.DevVoid, "" ] ],
-                  'GetInfo' : [ [ PyTango.ArgType.DevVoid, "" ],
-                            [ PyTango.ArgType.DevVarStringArray, "" ] ],
-                  'Reset' : [ [ PyTango.ArgType.DevVoid, "" ],
-                            [ PyTango.ArgType.DevVoid, "" ] ],
-                  'OnlineCmd' : [ [ PyTango.ArgType.DevString, "" ],
-                            [ PyTango.ArgType.DevVarStringArray, "" ] ],
-                  'OscilOn' : [ [ PyTango.ArgType.DevVoid, "" ],
-                            [ PyTango.ArgType.DevVoid, "" ] ],
-                  'OscilOff' : [ [ PyTango.ArgType.DevVoid, "" ],
-                            [ PyTango.ArgType.DevVoid, "" ] ],
+    cmd_list = { 'RestoreSoftInBeam' : 
+                 [ [ PyTango.ArgType.DevVoid, RESTORESOFTINBEAM_IN_DOC ],
+                   [ PyTango.ArgType.DevVoid, RESTORESOFTINBEAM_OUT_DOC ] ],
+                 'Tune' : [ [ PyTango.ArgType.DevVoid, TUNE_IN_DOC ],
+                            [ PyTango.ArgType.DevVoid, TUNE_OUT_DOC ] ],
+                  'TunePeak' : [ [ PyTango.ArgType.DevVoid, TUNEPEAK_IN_DOC ],
+                            [ PyTango.ArgType.DevVoid, TUNEPEAK_OUT_DOC ] ],
+                  'Go' : [ [ PyTango.ArgType.DevVoid, GO_IN_DOC ],
+                            [ PyTango.ArgType.DevVoid, GO_OUT_DOC ] ],
+                  'Stop' : [ [ PyTango.ArgType.DevVoid, STOP_IN_DOC ],
+                            [ PyTango.ArgType.DevVoid, STOP_OUT_DOC ] ],
+                  'Pause' : [ [ PyTango.ArgType.DevString, PAUSE_IN_DOC ],
+                            [ PyTango.ArgType.DevVoid, PAUSE_OUT_DOC ] ],
+                  'SetOperationFlags' : [ [ PyTango.ArgType.DevVarStringArray, 
+                                            SETOPERATIONFLAGS_IN_DOC ],
+                                        [ PyTango.ArgType.DevVoid, 
+                                            SETOPERATIONFLAGS_OUT_DOC ] ],
+                  'ClearOperationFlags' : [ [ PyTango.ArgType.DevVarStringArray, 
+                                              CLEAROPERATIONFLAGS_IN_DOC ],
+                                        [ PyTango.ArgType.DevVoid,
+                                              CLEAROPERATIONFLAGS_OUT_DOC ] ],
+                  'GetInfo' : [ [ PyTango.ArgType.DevVoid, GETINFO_IN_DOC ],
+                            [ PyTango.ArgType.DevVarStringArray, 
+                              GETINFO_OUT_DOC ] ],
+                  'Reset' : [ [ PyTango.ArgType.DevVoid, RESET_IN_DOC ],
+                            [ PyTango.ArgType.DevVoid, RESET_OUT_DOC ] ],
+                  'OnlineCmd' : [ [ PyTango.ArgType.DevString, 
+                                    ONLINECMD_IN_DOC ],
+                            [ PyTango.ArgType.DevVarStringArray, 
+                              ONLINECMD_OUT_DOC ] ],
+                  'OscilOn' : [ [ PyTango.ArgType.DevVoid, OSCILON_IN_DOC ],
+                            [ PyTango.ArgType.DevVoid, OSCILON_OUT_DOC ] ],
+                  'OscilOff' : [ [ PyTango.ArgType.DevVoid, OSCILOFF_IN_DOC ],
+                            [ PyTango.ArgType.DevVoid, OSCILOFF_OUT_DOC ] ],
     }
 
     attr_list = { 'InBeamConf' : [ [ PyTango.ArgType.DevString ,
                                     PyTango.AttrDataFormat.SCALAR ,
-                                    PyTango.AttrWriteType.READ_WRITE] ],
+                                    PyTango.AttrWriteType.READ_WRITE],
+                                   {'description' : INBEAMCONF_DOC} ],
                   'OutBeamConf' : [ [ PyTango.ArgType.DevString ,
                                     PyTango.AttrDataFormat.SCALAR ,
-                                    PyTango.AttrWriteType.READ_WRITE] ],
+                                    PyTango.AttrWriteType.READ_WRITE],
+                                    {'description' : OUTBEAMCONF_DOC} ],
                   'SetPoint' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ_WRITE ] ],
+                                  PyTango.AttrWriteType.READ_WRITE ],
+                                 {'description' : SETPOINT_DOC} ],
                   'Mode' : [ [ PyTango.ArgType.DevString ,
                                     PyTango.AttrDataFormat.SCALAR ,
-                                    PyTango.AttrWriteType.READ_WRITE] ],
+                                    PyTango.AttrWriteType.READ_WRITE],
+                             {'description' : MODE_DOC} ],
                   'Tau' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ_WRITE ] ],
+                                  PyTango.AttrWriteType.READ_WRITE ],
+                            {'description' : TAU_DOC} ],
                   'SoftBeam' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ ] ],
+                                  PyTango.AttrWriteType.READ ],
+                                 {'description' : SOFTBEAM_DOC} ],
                   'OperationFlags' : [ [ PyTango.ArgType.DevString,
                                   PyTango.AttrDataFormat.SPECTRUM,
-                                  PyTango.AttrWriteType.READ, 
-                                  7 ] ],
+                                  PyTango.AttrWriteType.READ, 7 ], 
+                                       {'description' : OPERATIONFLAGS_DOC} ],
                   'MocoState' : [ [ PyTango.ArgType.DevString,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ ] ],
+                                  PyTango.AttrWriteType.READ ],
+                                  {'description' : MOCOSTATE_DOC} ],
                   'Piezo' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ_WRITE ] ],
+                                  PyTango.AttrWriteType.READ_WRITE ],
+                              {'description' : PIEZO_DOC}],
                   'ScanSpeed' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ_WRITE ] ],
+                                  PyTango.AttrWriteType.READ_WRITE ],
+                                 {'description' : SCANSPEED_DOC} ],
                   'OscBeamMainSignal' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ_WRITE ] ],
+                                  PyTango.AttrWriteType.READ_WRITE ],
+                                    {'description' : OSCBEAMMAINSIGNAL_DOC} ],
                   'OscBeamQuadSignal' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ_WRITE ] ],
+                                  PyTango.AttrWriteType.READ_WRITE ],
+                                    {'description' : OSCBEAMQUADSIGNAL_DOC} ],
                   'Phase' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ_WRITE ] ],
+                                  PyTango.AttrWriteType.READ_WRITE ],
+                              {'description' : PHASE_DOC} ],
                   'Amplitude' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ_WRITE ] ],
+                                  PyTango.AttrWriteType.READ_WRITE ], 
+                                  {'description' : AMPLITUDE_DOC} ],
                   'Frequency' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ_WRITE ] ],
+                                  PyTango.AttrWriteType.READ_WRITE ],
+                                  {'description' : FREQUENCY_DOC} ],
                   'Slope' : [ [ PyTango.ArgType.DevDouble,
                                   PyTango.AttrDataFormat.SCALAR,
-                                  PyTango.AttrWriteType.READ_WRITE ] ]
+                                  PyTango.AttrWriteType.READ_WRITE ],
+                              {'description' : SLOPE_DOC} ]
 
 
     }
