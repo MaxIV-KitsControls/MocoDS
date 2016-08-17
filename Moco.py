@@ -122,6 +122,30 @@ class MocoClass(PyTango.DeviceClass):
                                   PyTango.AttrDataFormat.SPECTRUM,
                                   PyTango.AttrWriteType.READ, 7 ], 
                                        {'description' : OPERATIONFLAGS_DOC} ],
+                  'Beam' : [ [ PyTango.ArgType.DevString,
+                                  PyTango.AttrDataFormat.SCALAR,
+                                  PyTango.AttrWriteType.READ ],
+                                  {'description' : "Beam"} ],
+                  'FBeam' : [ [ PyTango.ArgType.DevString,
+                                  PyTango.AttrDataFormat.SCALAR,
+                                  PyTango.AttrWriteType.READ ],
+                                  {'description' : "FBeam"} ],                                 
+                  'Beam_In' : [ [ PyTango.ArgType.DevDouble,
+                                  PyTango.AttrDataFormat.SCALAR,
+                                  PyTango.AttrWriteType.READ ],
+                                  {'description' : "Beam_In"} ],
+                  'Beam_Out' : [ [ PyTango.ArgType.DevDouble,
+                                  PyTango.AttrDataFormat.SCALAR,
+                                  PyTango.AttrWriteType.READ ],
+                                  {'description' : "Beam_Out"} ],
+                  'FBeam_In' : [ [ PyTango.ArgType.DevDouble, 
+                                  PyTango.AttrDataFormat.SCALAR,
+                                  PyTango.AttrWriteType.READ ],
+                                  {'description' : "FBeam_In"} ],
+                  'FBeam_Out' : [ [ PyTango.ArgType.DevDouble,
+                                  PyTango.AttrDataFormat.SCALAR,
+                                  PyTango.AttrWriteType.READ ],
+                                  {'description' : "FBeam_Out"} ],                                    
                   'MocoState' : [ [ PyTango.ArgType.DevString,
                                   PyTango.AttrDataFormat.SCALAR,
                                   PyTango.AttrWriteType.READ ],
@@ -191,7 +215,9 @@ class Moco(PyTango.Device_4Impl):
         else:
             self.set_state(PyTango.DevState.ALARM)
             self.set_status("Unbable to open serial connection.")
-        self.inBeamAttr = PyTango.AttributeProxy(self.softwareInBeamAttr)
+        self.inBeamAttr = None
+        if hasattr(self, 'softwareInBeamAtt'):
+            self.inBeamAttr = PyTango.AttributeProxy(self.softwareInBeamAttr)
 
     #------------------------------------------------------------------
 
@@ -209,8 +235,11 @@ class Moco(PyTango.Device_4Impl):
 
     def RestoreSoftInBeam(self):
         inBeam = self.inBeamAttr.read().value
-        self.debug_stream("Setting softbeam to %f" % float(inBeam))
-        self.setToMoco("SOFTBEAM %f" % float(inBeam))
+        if hasattr(self, 'softwareInBeamAtt'):
+            self.debug_stream("Setting softbeam to %f" % float(inBeam))
+            self.setToMoco("SOFTBEAM %f" % float(inBeam))
+        else:
+            raise Exception("Error: softwareInBeamAttr is not defined")
            
     def is_Tune_allowed(self):
         return self.get_state() == PyTango.DevState.ON
@@ -407,6 +436,78 @@ class Moco(PyTango.Device_4Impl):
     def is_OperationFlags_allowed(self, req_type):
         return self.get_state() in (PyTango.DevState.ON,)
 
+    def read_Beam(self, the_att):
+        self.info_stream("read_Beam")
+        ans = self.getFromMoco('?BEAM')
+        beam = ans[:-2]
+        self.debug_stream("Beam = %s" % beam)
+        the_att.set_value(beam)
+
+    def is_Beam_allowed(self, req_type):
+        return self.get_state() in (PyTango.DevState.ON,)
+
+    def read_FBeam(self, the_att):
+        self.info_stream("read_FBeam")
+        ans = self.getFromMoco('?FBEAM')
+        beam = ans[:-2]
+        self.debug_stream("FBeam = %s" % beam)
+        the_att.set_value(beam)
+
+    def is_FBeam_allowed(self, req_type):
+        return self.get_state() in (PyTango.DevState.ON,)
+    
+    
+    def read_Beam_In(self, the_att):
+        self.info_stream("read_Beam_In")
+        ans = self.getFromMoco('?BEAM')
+        beam = ans[:-2]
+        beam = beam.split(" ")[0]
+	beam = float(beam)
+        self.debug_stream("Beam_In = %f" % beam)
+        the_att.set_value(beam)
+
+    def is_Beam_In_allowed(self, req_type):
+        return self.get_state() in (PyTango.DevState.ON,)
+  
+    def read_Beam_Out(self, the_att):
+        self.info_stream("read_Beam_Out")
+        ans = self.getFromMoco('?BEAM')
+        beam = ans[:-2]
+        beam = beam.split(" ")[1]
+	beam = float(beam)
+        self.debug_stream("Beam_Out = %f" % beam)
+        the_att.set_value(beam)
+
+    def is_Beam_Out_allowed(self, req_type):
+        return self.get_state() in (PyTango.DevState.ON,)
+
+
+    def read_FBeam_In(self, the_att): 
+        self.info_stream("read_FBeam_In")
+        ans = self.getFromMoco('?FBEAM')
+        beam = ans[:-2]
+        beam = beam.split(" ")[0]
+	beam = float(beam)
+        self.debug_stream("FBeam_In = %f" % beam)
+        the_att.set_value(beam)
+
+    def is_FBeam_In_allowed(self, req_type):
+        return self.get_state() in (PyTango.DevState.ON,) 
+    
+    
+    def read_FBeam_Out(self, the_att):
+        self.info_stream("read_FBeam_Out")
+        ans = self.getFromMoco('?FBEAM')
+        beam = ans[:-2]
+        beam = beam.split(" ")[1]
+	beam = float(beam)
+        self.debug_stream("FBeam_Out = %f" % beam)
+        the_att.set_value(beam) 
+
+    def is_FBeam_Out_allowed(self, req_type):
+        return self.get_state() in (PyTango.DevState.ON,) 
+    
+
     def read_MocoState(self, the_att):
         self.info_stream("read_MocoState")
         ans = self.getFromMoco('?STATE')
@@ -528,6 +629,7 @@ class Moco(PyTango.Device_4Impl):
 
     def is_Slope_allowed(self, req_type):
         return self.get_state() in (PyTango.DevState.ON,)
+    
     #-------------------------------------------------------------------
     # ADITIONAL METHODS
     #-------------------------------------------------------------------
