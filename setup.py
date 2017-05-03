@@ -13,22 +13,20 @@ def main():
         packages= find_packages(),
         version = '1.2',    
         long_description='long_description test',
-        scripts=[],
-        data_files=[],
         url='http://www.cells.es',
         author='CTBeamlines',
         author_email='ctbeamlines@cells.es',
         description='This package contains MoCo DS',
         platforms = "all",        
         include_package_data = True,
-    )
     
-    # Define automatic scripts tht will be created during installation.
-    entry_points={
-        'console_scripts': [
-            'Moco = PyMocoDS.Moco:main',
-        ],
-    }
+   	# Define automatic scripts tht will be created during installation.
+	entry_points={
+	   'console_scripts': [
+	       'Moco = PyMocoDS.Moco:main',
+	   ],
+	}
+	)
 
 
 
