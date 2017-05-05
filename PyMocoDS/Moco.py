@@ -657,10 +657,13 @@ class Moco(PyTango.Device_4Impl):
             self.info_stream("getFromMoco: %s" % ans)
             return ans
 
-if __name__ == '__main__':
+def main():
     util = PyTango.Util(sys.argv)
     util.add_class(MocoClass, Moco)
 
     U = PyTango.Util.instance()
     U.server_init()
     U.server_run()
+
+if __name__ == '__main__':
+    main()
