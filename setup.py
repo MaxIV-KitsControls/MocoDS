@@ -11,7 +11,7 @@ def main():
     setup(
         name='MocoDS',
         packages= find_packages(),
-        version = '1.2',    
+        version = '1.2.1',    
         long_description='long_description test',
         url='http://www.cells.es',
         author='CTBeamlines',
