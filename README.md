@@ -5,7 +5,8 @@ the position of an optical component in a synchrotron radiation beamline.
 
 Is necessary a Serial port to manage the MoCo.
 
-MAX IV version communicate vi Moxa device (Ethernet to Serial converter).
+MAX IV version communicate via Moxa device (Ethernet to Serial converter).
+
 Original software from Alba: https://github.com/ALBA-Synchrotron/MocoDS
 
 
