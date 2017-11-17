@@ -1,6 +1,9 @@
 import sys
-import serial
+import socket
 import PyTango
+
+""" line feed characters """
+LF = '\n'
 
 RESTORESOFTINBEAM_IN_DOC = ''
 RESTORESOFTINBEAM_OUT_DOC = ''
@@ -185,17 +188,20 @@ class MocoClass(PyTango.DeviceClass):
 
 
     }
-    
+
     #    Device Properties
-    device_property_list = {'serialDevice': [PyTango.DevString,
-                                            "name of the system serial device",
+    device_property_list = {'Host': [PyTango.DevString,
+                                    "name of the moxa device",
+                                            [] ],
+                            'Port': [PyTango.DevInt,
+                                    "port number of the moxa device",
                                             [] ],
                             'softwareInBeamAttr': [PyTango.DevString,
                                             "name of the Tango attribute of the in beam",
                                             [] ],
                            }
 
-
+    
 class Moco(PyTango.Device_4Impl):
 
     def __init__(self,cl,name):
@@ -206,15 +212,16 @@ class Moco(PyTango.Device_4Impl):
     def init_device(self):
         self.info_stream('In Python init_device method')
         self.get_device_properties(self.get_device_class())
-        self.debug_stream("serialDevice: %s; softwareInBeamAttr%s" % (self.serialDevice,self.softwareInBeamAttr))
-        self.moco = serial.Serial(self.serialDevice)
-        self.moco.timeout = 1.5
-        self.moco.open()
-        if self.moco.isOpen():
+        self.debug_stream("host: %s; port: %d; softwareInBeamAttr: %s" % (self.Host, self.Port, self.softwareInBeamAttr))
+
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            self.socket.connect((self.Host, self.Port))
             self.set_state(PyTango.DevState.ON)
-        else:
-            self.set_state(PyTango.DevState.ALARM)
+        except Exception:
+            self.set_state(PyTango.DevState.FAULT)
             self.set_status("Unbable to open serial connection.")
+
         self.inBeamAttr = None
         if hasattr(self, 'softwareInBeamAtt'):
             self.inBeamAttr = PyTango.AttributeProxy(self.softwareInBeamAttr)
@@ -223,8 +230,7 @@ class Moco(PyTango.Device_4Impl):
 
     def delete_device(self):
         self.info_stream('Moco.delete_device')
-        if self.moco.isOpen():
-            self.moco.close()
+        self.socket.close()
 
     #------------------------------------------------------------------
     # COMMANDS
@@ -632,30 +638,46 @@ class Moco(PyTango.Device_4Impl):
     
     #-------------------------------------------------------------------
     # ADITIONAL METHODS
+    # code adapted to communicate via Moxa device
     #-------------------------------------------------------------------
 
     def setToMoco(self, cmd):
         self.info_stream("setToMoco: %s" % cmd)
-        self.moco.write(cmd + "\r")
-        self.moco.write("?ERR\r")
-        ans = self.moco.readline()
+        self.send(cmd)
+        ans = self.query("?ERR")
         if ans != "OK\r\n":
             raise Exception("Error: %s" % ans)    
 
     def getFromMoco(self, cmd):
-        MULTILINE_CMDS = ["?HELP", "?INFO"]
-        self.moco.write(cmd + "\r")
-        if cmd in MULTILINE_CMDS:
-            ans = self.moco.readlines()
-        else:
-            ans = self.moco.readline()
+        ans = self.query(cmd)
         if ans == "ERROR\r\n":
-            self.moco.write("?ERR\r")
-            ans = self.moco.readline()
-            raise Exception("Error: %s" % ans)
+            err = self.query("?ERR")
+            raise Exception("Error: %s" % err)
         else:
             self.info_stream("getFromMoco: %s" % ans)
             return ans
+
+    def send(self, cmd):
+        self.socket.send(cmd + LF)
+
+    def recv(self):
+        r = ''
+        try:
+            while True:
+                r += self.socket.recv(1)
+                if r.endswith(LF):
+                    break
+        except Exception as ex:
+            raise ex
+        r.rstrip(LF)
+        return r
+
+    def query(self, cmd):
+        try:
+            self.send(cmd)
+            return self.recv()
+        except ValueError as err:
+            raise ValueError("Command type error")
 
 def main():
     util = PyTango.Util(sys.argv)
