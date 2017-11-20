@@ -2,7 +2,7 @@ import sys
 import socket
 import PyTango
 
-""" line feed characters """
+""" command terminator """
 LF = '\n'
 
 RESTORESOFTINBEAM_IN_DOC = ''
@@ -215,12 +215,14 @@ class Moco(PyTango.Device_4Impl):
         self.debug_stream("host: %s; port: %d; softwareInBeamAttr: %s" % (self.Host, self.Port, self.softwareInBeamAttr))
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(1.5)
         try:
             self.socket.connect((self.Host, self.Port))
             self.set_state(PyTango.DevState.ON)
-        except Exception:
+        except Exception as e:
             self.set_state(PyTango.DevState.FAULT)
-            self.set_status("Unbable to open serial connection.")
+            self.set_status("Unable to open connection.")
+            self.debug_stream("Failed to connect %s" % e)
 
         self.inBeamAttr = None
         if hasattr(self, 'softwareInBeamAtt'):
