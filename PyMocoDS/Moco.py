@@ -647,12 +647,12 @@ class Moco(PyTango.Device_4Impl):
         self.info_stream("setToMoco: %s" % cmd)
         self.send(cmd)
         ans = self.query("?ERR")
-        if ans != "OK\r\n":
+        if ans[:-2] != "OK":
             raise Exception("Error: %s" % ans)    
 
     def getFromMoco(self, cmd):
         ans = self.query(cmd)
-        if ans == "ERROR\r\n":
+        if ans[:-2] == "ERROR":
             err = self.query("?ERR")
             raise Exception("Error: %s" % err)
         else:
