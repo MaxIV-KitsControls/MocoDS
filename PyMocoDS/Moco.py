@@ -663,16 +663,12 @@ class Moco(PyTango.Device_4Impl):
         self.socket.send(cmd + LF)
 
     def recv(self):
-        r = ''
-        try:
-            while True:
-                r += self.socket.recv(1)
-                if r.endswith(LF):
-                    break
-        except Exception as ex:
-            raise ex
-        r.rstrip(LF)
-        return r
+        data = ''
+        while True:
+            data += self.socket.recv(1)
+            if data.endswith(LF):
+                break
+        return data
 
     def query(self, cmd):
         try:
