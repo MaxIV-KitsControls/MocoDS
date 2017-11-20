@@ -300,8 +300,10 @@ class Moco(PyTango.Device_4Impl):
 
     def GetInfo(self):
         info = self.getFromMoco("?INFO")
-        info = [line[:-2] for line in info] #getting rid of last ascii characters "\r\n"
         self.debug_stream("Info: %s" % repr(info))
+        if isinstance(info, str):
+            info = [info]
+        info = [line[:-2] for line in info] #getting rid of last ascii characters "\r\n"
         return info
 
     def is_Reset_allowed(self):
@@ -651,7 +653,20 @@ class Moco(PyTango.Device_4Impl):
             raise Exception("Error: %s" % ans)    
 
     def getFromMoco(self, cmd):
-        ans = self.query(cmd)
+        MULTILINE_CMDS = ["?HELP", "?INFO"]
+        if cmd in MULTILINE_CMDS:
+            # query once and keep receiving lines
+            lines = self.query(cmd) # first $
+            while True:
+                line = self.recv() 
+                lines += line
+                if line[:-2] == "$":
+                    break
+            self.debug_stream(lines)
+            ans = lines 
+        else:
+            ans = self.query(cmd)
+
         if ans[:-2] == "ERROR":
             err = self.query("?ERR")
             raise Exception("Error: %s" % err)
