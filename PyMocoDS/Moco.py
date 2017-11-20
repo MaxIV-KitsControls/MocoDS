@@ -3,7 +3,7 @@ import socket
 import PyTango
 
 """ command terminator """
-LF = '\n'
+LF = '\r\n'
 
 RESTORESOFTINBEAM_IN_DOC = ''
 RESTORESOFTINBEAM_OUT_DOC = ''
