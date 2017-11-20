@@ -9,14 +9,13 @@ def main():
         return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
     setup(
-        name='MocoDS',
+        name='tangods-moco',
         packages= find_packages(),
-        version = '1.2.1',    
-        long_description='long_description test',
-        url='http://www.cells.es',
-        author='CTBeamlines',
-        author_email='ctbeamlines@cells.es',
-        description='This package contains MoCo DS',
+        version = '1.3.0',    
+        url = "http://www.maxiv.lu.se",
+        author='Juliano Murari',
+        author_email='juliano.murari@maxiv.lu.se',
+        description='This package contains Tango Device for MoCo equipment',
         platforms = "all",        
         include_package_data = True,
     
@@ -27,7 +26,6 @@ def main():
 	   ],
 	}
 	)
-
 
 
 if __name__ == "__main__":
